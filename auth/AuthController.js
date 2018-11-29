@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const config = require('../config');
+const verifyToken = require("./VerifyToken");
 
 const router = express.Router();
 
@@ -39,15 +40,30 @@ router.post('/register', (req, res) => {
     })
 });
 
-router.get('/me', (req, res) => {
-    var token = req.headers['x-access-token'];
-    if (!token) return res.status(401).send({ auth: false, message: 'No se proveyo ningun token.' });
+router.get('/me', verifyToken, (req, res, next) => {
+    console.log("/me");
+    User.findById(req.userId, { password: 0 }, (err, user) => {
+        if (err) return res.status(404).send("Hubo un problema al buscar el usuario.");
+        if (!user) return res.status(404).send("No se encontro el usuario.");
+        
+        res.status(200).send(user);
+    });
+});
 
-    jwt.verify(token, config.secret, (err, decoded) => {
-        if (err) return res.status(500).send({ auth: false, message: 'Falla al autenticar el token.' });
+router.post("/login", (req, res) => {
+    console.log("/login");
+    User.findOne({ email: req.body.email }, (err, user) => {
+        if (err) return res.status(500).send("Error en servidor al autenticar.");
+        if (!user) return res.status(404).send("No se encontro el usuario.");
 
-        res.status(200).send(decoded);
-    })
+        let passwordIsInvalid = bcrypt.compareSync(req.body.password, user.password);
+        if (!passwordIsInvalid) return res.status(401).send({ auth: false, token: null });
+        
+        let token = jwt.sign({ id: user._id }, config.secret, {
+            expiresIn: 86400// Expira en 24 horas
+        });
+        res.status(200).send({ auth: true, token: token });
+    });
 });
 
 module.exports = router;
