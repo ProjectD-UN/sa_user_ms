@@ -36,7 +36,7 @@ router.post('/register', (req, res) => {
             expiresIn: 86400 //24 horas = 1 dia
         });
         console.log('/register')        
-        res.status(200).send({auth: true, token:token});
+        res.status(200).send({auth: true, token: token, expiresIn: 86400});
     })
 });
 
@@ -62,7 +62,7 @@ router.post("/login", (req, res) => {
         let token = jwt.sign({ id: user._id }, config.secret, {
             expiresIn: 86400// Expira en 24 horas
         });
-        res.status(200).send({ auth: true, token: token });
+        res.status(200).send({ auth: true, token: token, expiresIn: 86400 });
     });
 });
 
