@@ -30,7 +30,7 @@ router.post('/register', (req, res) => {
         email: req.body.email,
         password: hashedPassword
     }, (err, user) => {
-        if (err) return res.status(500).send("Hubo un problema con el registro de usuario.");
+        if (err) return res.status(500).send({auth: false, message: "Hubo un problema con el registro de usuario."});
 
         // creacion token
         let token = jwt.sign({id: user._id}, config.secret, {
@@ -44,8 +44,8 @@ router.post('/register', (req, res) => {
 router.get('/me', verifyToken, (req, res, next) => {
     console.log("/me");
     User.findById(req.userId, { password: 0 }, (err, user) => {
-        if (err) return res.status(404).send("Hubo un problema al buscar el usuario.");
-        if (!user) return res.status(404).send("No se encontro el usuario.");
+        if (err) return res.status(404).send({ auth: false, message: "Hubo un problema al buscar el usuario."});
+        if (!user) return res.status(404).send({ auth: false, message: "No se encontro el usuario."});
         
         res.status(200).send(user);
     });
@@ -62,8 +62,8 @@ const connect = () => {
 router.post("/login", (req, res) => {
     console.log("/login");
     User.findOne({ email: req.body.email }, (err, user) => {
-        if (err) return res.status(500).send("Error en servidor al autenticar.");
-        if (!user) return res.status(404).send("El usuario no se encontro en la base de datos.");
+        if (err) return res.status(500).send({ auth: false, message: "Error en servidor al autenticar."});
+        if (!user) return res.status(404).send({ auth: false, message: "El usuario no se encontro en la base de datos."});
 
         let clientldap = connect();
         clientldap.on('connect', () => {
@@ -72,10 +72,10 @@ router.post("/login", (req, res) => {
             let password = req.body.password;
             let dn = "cn=" + username + ",ou=apollo,dc=apollo,dc=unal,dc=edu,dc=co";
             clientldap.bind(dn, password, (err) => {
-                if (err) return res.status(500).send('El usuario no existe en el servidor LDAP.');
+                if (err) return res.status(500).send({ auth: false, message: 'El usuario no existe en el servidor LDAP.'});
                 
                 let passwordIsInvalid = bcrypt.compareSync(req.body.password, user.password);
-                if (!passwordIsInvalid) return res.status(401).send({ auth: false, token: null });
+                if (!passwordIsInvalid) return res.status(401).send({ auth: false, message: "La contraseña no es la correcta." });
 
                 let token = jwt.sign({ id: user._id }, config.secret, {
                     expiresIn: 86400// Expira en 24 horas
