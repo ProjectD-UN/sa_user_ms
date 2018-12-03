@@ -1,0 +1,18 @@
+version: '2'
+services:
+  sa-user-db:
+    image: mongo  
+    restart: always
+    ports:
+      - 27017:27017
+  sa-user-ms:
+    build: .
+    restart: always    
+    environment:
+      DOCKER_DEPLOY: 'true'
+      SECRET: 'arquisoft'
+      PORT: 3000      
+    ports:
+      - "3000:3000"
+    links:
+      - sa-user-db  
