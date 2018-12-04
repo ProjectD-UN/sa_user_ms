@@ -12,6 +12,7 @@ services:
       DOCKER_DEPLOY: 'true'
       SECRET: 'arquisoft'
       PORT: 3000      
+      DATABASE: '27018'
     ports:
       - "3000:3000"
     links:

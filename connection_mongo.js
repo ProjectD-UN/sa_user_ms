@@ -11,7 +11,8 @@ const options = {
 
 const startingMongoDB = () => {
     const adress = process.env.DOCKER_DEPLOY? 'sa-user-db': '127.0.0.1';    
-    mongoose.connect(`mongodb://${adress}:27017/users`, options, (err) => {
+    const database = process.env.DATABASE? '27018':'27017';
+    mongoose.connect(`mongodb://${adress}:${database}/users`, options, (err) => {
         if (err) {
             console.log('Not connected to users');
             setTimeout(startingMongoDB, 5000);
