@@ -5,7 +5,7 @@ const LDAP = require('./ldap');
 
 
 const app = express();
-const port =  process.env.PORT || 3000;
+const port =  process.env.PORT || 3003;
 
 app.use('/api/auth', AuthController);
 app.use('/api/auth', LDAP);
