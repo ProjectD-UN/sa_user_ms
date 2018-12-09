@@ -54,7 +54,7 @@ router.get('/me', verifyToken, (req, res, next) => {
 // Connecting with LDAP server
 const connect = () => {
     let client = ldap.createClient({
-        url: 'ldap://35.231.237.201:389'
+        url: `ldap://${process.env.LDAP}:${process.env.LDAP_PORT}`
     });
     return client;
 }
